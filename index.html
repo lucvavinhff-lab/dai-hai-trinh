@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Đại Hải Trình RPG 2.3</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#061526;color:#eefaff;font-family:system-ui,Arial,sans-serif}
+button{font:inherit;touch-action:manipulation;cursor:pointer}
+button:active{transform:scale(.96)}
+#menu{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse,#125274,#061526 75%)}
+.panel{width:100%;max-width:520px;text-align:center;padding:25px 18px;border:2px solid #48c9ff;border-radius:25px;background:#061c30eF;box-shadow:0 0 35px #168ec344}
+h1{font-size:clamp(30px,8vw,45px);color:#ffdc72;text-shadow:2px 3px #b84424;margin:0}
+.sub{font-size:19px;font-weight:800}
+.desc{color:#b8e9ff;line-height:1.6}
+.btn{border:1px solid #73d9ff;border-radius:14px;background:linear-gradient(#17658d,#103652);color:white;padding:13px 18px;font-weight:800;margin:6px;box-shadow:0 3px #03101d}
+#game{display:none;min-height:100dvh;padding:12px;max-width:700px;margin:auto}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{background:#12344d;border:1px solid #326d8c;border-radius:10px;padding:8px}
+.bar{height:13px;background:#263b4d;border-radius:9px;overflow:hidden;margin:5px 0 10px}
+.fill{height:100%;width:100%;transition:width .2s}
+.hp{background:#ff4d64}.xp{background:#55e6a5}
+.scene{position:relative;min-height:210px;margin:12px 0;padding:18px;border-radius:18px;border:1px solid #3ba9d6;text-align:center;overflow:hidden;background:linear-gradient(#104c70,#167b91 65%,#d3b76b 66%,#8d6c3e)}
+.scene:before{content:"☁️     ☁️       ☁️";position:absolute;top:15px;left:0;width:100%;font-size:23px;opacity:.8}
+.island{position:relative;z-index:1;font-size:55px;margin-top:15px}
+.enemy{position:relative;z-index:1;font-size:48px;filter:drop-shadow(0 4px 3px #123)}
+#enemyName{font-weight:900;font-size:20px}
+#log{height:105px;overflow:auto;background:#04111f;border-radius:12px;padding:10px;font-size:14px;line-height:1.55;border:1px solid #244b63}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.controls button{width:100%;margin:0;min-height:48px}
+.small{font-size:13px;color:#b5d6e6}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#toast{color:#ffdf7b;font-weight:800;min-height:24px;text-align:center}
+</style>
+</head>
+<body>
+<section id="menu">
+ <div class="panel">
+  <h1>ĐẠI HẢI TRÌNH</h1>
+  <div class="sub">RPG 2.3 · ANDROID FIX</div>
+  <p class="desc">🏴‍☠️ Phiêu lưu giữa đại dương<br>🏝️ Khám phá đảo · ⚔️ Chiến đấu với boss<br>🍈 Trái ác quỷ · 📈 Lên cấp · 💾 Lưu game</p>
+  <button class="btn" id="start">▶ BẮT ĐẦU HÀNH TRÌNH</button>
+  <br><button class="btn" id="continue">↻ TIẾP TỤC</button>
+  <p class="small">Fan-game không chính thức. Tiến trình lưu trên thiết bị.</p>
+  <p id="menuMessage" class="small"></p>
+ </div>
+</section>
+
+<main id="game">
+ <div class="top">
+  <b>🏴‍☠️ ĐẠI HẢI TRÌNH</b>
+  <button class="btn" id="save">💾 Lưu</button>
+  <button class="btn" id="home">⌂ Menu</button>
+ </div>
+ <div class="tag" id="heroInfo"></div>
+ <div class="tag">❤️ HP <span id="hpText"></span><div class="bar"><div class="fill hp" id="hpBar"></div></div>
+ ⚡ EXP <span id="xpText"></span><div class="bar"><div class="fill xp" id="xpBar"></div></div></div>
+ <div class="scene">
+  <div class="island" id="islandIcon">🏝️</div>
+  <b id="islandName">Đảo Bình Minh</b>
+  <p id="islandDesc">Cuộc phiêu lưu bắt đầu!</p>
+  <div class="enemy" id="enemyIcon">🏴‍☠️</div>
+  <div id="enemyName">Hải tặc tập sự</div>
+  <div class="small" id="enemyHp"></div>
+ </div>
+ <div id="toast"></div>
+ <div class="controls">
+  <button class="btn" id="attack">⚔️ Tấn công</button>
+  <button class="btn" id="skill">🍈 Cao su: Súng</button>
+  <button class="btn" id="dodge">💨 Né đòn</button>
+  <button class="btn" id="heal">🍖 Hồi phục</button>
+  <button class="btn" id="switch">👒 Đổi nhân vật</button>
+  <button class="btn" id="fruit">✨ Haki</button>
+  <button class="btn" id="next">⛵ Sang đảo kế</button>
+  <button class="btn" id="quest">📜 Nhiệm vụ</button>
+ </div>
+ <div class="tag">📜 Nhật ký hành trình</div>
+ <div id="log" aria-live="polite">Chào mừng đến với Đại Hải Trình!</div>
+ <p class="small">Đánh bại kẻ địch để nhận EXP và vàng. Boss mạnh hơn quái thường. Hãy hồi phục khi cần!</p>
+</main>
+
+<script>
+(function(){
+"use strict";
+
+const $=id=>document.getElementById(id);
+const islands=[
+ {name:"Đảo Bình Minh",icon:"🏝️",desc:"Nơi bắt đầu hành trình.",enemy:"Hải tặc tập sự",emoji:"🏴‍☠️",hp:35,atk:6},
+ {name:"Shells Town",icon:"🏘️",desc:"Thị trấn dưới sự kiểm soát của hải quân.",enemy:"Kiếm sĩ hải quân",emoji:"⚔️",hp:55,atk:9},
+ {name:"Orange Town",icon:"🎪",desc:"Một thị trấn đầy những tên cướp biển.",enemy:"Tên hề nguy hiểm",emoji:"🤡",hp:80,atk:12},
+ {name:"Làng Syrup",icon:"🌳",desc:"Khu rừng với nhiều cạm bẫy.",enemy:"Thợ săn tiền thưởng",emoji:"🏹",hp:105,atk:15},
+ {name:"Baratie",icon:"🚢",desc:"Nhà hàng nổi giữa biển.",enemy:"Chiến binh biển",emoji:"🦈",hp:140,atk:18},
+ {name:"Arlong Park",icon:"🌴",desc:"Đối đầu băng người cá.",enemy:"Arlong · BOSS",emoji:"🦈",hp:240,atk:24},
+ {name:"Alabasta",icon:"🏜️",desc:"Vương quốc sa mạc.",enemy:"Đặc vụ Baroque",emoji:"🦂",hp:300,atk:29},
+ {name:"Enies Lobby",icon:"🏰",desc:"Đột kích pháo đài chính phủ.",enemy:"Đặc vụ CP9 · BOSS",emoji:"🥷",hp:420,atk:36},
+ {name:"Marineford",icon:"⚓",desc:"Trận chiến rung chuyển đại dương.",enemy:"Đô đốc hải quân · BOSS",emoji:"🌋",hp:600,atk:44},
+ {name:"Wano",icon:"🏯",desc:"Vùng đất samurai và Tứ Hoàng.",enemy:"Tứ Hoàng · BOSS",emoji:"🐉",hp:850,atk:55}
+];
+
+const heroes=[
+ {name:"Luffy",emoji:"👒",fruit:"Cao su",skill:"Cao su: Súng",power:12},
+ {name:"Zoro",emoji:"⚔️",fruit:"Kiếm thuật",skill:"Tam kiếm",power:16},
+ {name:"Sanji",emoji:"🦵",fruit:"Hắc cước",skill:"Diable Jambe",power:14},
+ {name:"Nami",emoji:"🌩️",fruit:"Thiên hậu",skill:"Lôi kích",power:11},
+ {name:"Usopp",emoji:"🎯",fruit:"Bách phát",skill:"Đạn đặc biệt",power:13}
+];
+
+let state;
+let busy=false;
+function fresh(){
+ return {island:0,hero:0,level:1,xp:0,gold:0,hp:100,maxHp:100,
+ enemyHp:35,enemyMax:35,enemyIndex:0,won:false,haki:false,
+ gear:1,items:3,quests:0};
+}
+function setEnemy(){
+ const a=islands[state.island];
+ state.enemyIndex=0;
+ state.enemyMax=a.hp;
+ state.enemyHp=a.hp;
+ state.won=false;
+}
+function log(s){
+ const box=$("log");
+ box.innerHTML+= "<div>› "+escapeText(s)+"</div>";
+ box.scrollTop=box.scrollHeight;
+}
+function escapeText(s){
+ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function toast(s){$("toast").textContent=s;}
+function render(){
+ const a=islands[state.island],h=heroes[state.hero];
+ $("heroInfo").textContent=h.emoji+" "+h.name+" · Cấp "+state.level+" · 💰 "+state.gold+" vàng · 🍖 "+state.items;
+ $("hpText").textContent=state.hp+" / "+state.maxHp;
+ $("hpBar").style.width=Math.max(0,state.hp/state.maxHp*100)+"%";
+ $("xpText").textContent=state.xp+" / "+(state.level*40);
+ $("xpBar").style.width=Math.min(100,state.xp/(state.level*40)*100)+"%";
+ $("islandIcon").textContent=a.icon;
+ $("islandName").textContent="Đảo "+a.name;
+ $("islandDesc").textContent=a.desc;
+ $("enemyIcon").textContent=state.won?"🏆":a.emoji;
+ $("enemyName").textContent=state.won?"Đã chiến thắng!":a.enemy;
+ $("enemyHp").textContent=state.won?"Đường biển đã thông!":"❤️ "+state.enemyHp+" / "+state.enemyMax;
+ $("skill").textContent="✨ "+h.skill;
+ $("fruit").textContent=state.haki?"🖤 Haki bật":"⚡ Haki";
+ $("next").disabled=!state.won||state.island>=islands.length-1;
+ $("next").style.opacity=$("next").disabled?".45":"1";
+}
+function showGame(){
+ $("menu").style.display="none";
+ $("game").style.display="block";
+ render();
+}
+function startGame(){
+ try{
+  state=fresh();setEnemy();
+  $("log").innerHTML="";
+  log("Hành trình bắt đầu! Hãy đánh bại kẻ địch đầu tiên.");
+  showGame();
+ }catch(e){$("menuMessage").textContent="Lỗi khởi chạy: "+e.message;}
+}
+function saveGame(){
+ try{
+  localStorage.setItem("dht_rpg23_save",JSON.stringify(state));
+  toast("Đã lưu tiến trình!");
+  log("Đã lưu tiến trình trên thiết bị.");
+ }catch(e){toast("Không thể lưu. Hãy kiểm tra bộ nhớ trình duyệt.");}
+}
+function loadGame(){
+ try{
+  const raw=localStorage.getItem("dht_rpg23_save");
+  if(!raw){$("menuMessage").textContent="Chưa có tiến trình để tiếp tục.";return;}
+  const s=JSON.parse(raw);
+  if(!s||!Number.isInteger(s.island)||s.island<0||s.island>=islands.length)throw Error("Dữ liệu lưu không hợp lệ");
+  state=Object.assign(fresh(),s);
+  state.hero=Math.max(0,Math.min(heroes.length-1,state.hero|0));
+  state.hp=Math.max(0,Math.min(state.maxHp,Number(state.hp)||1));
+  $("log").innerHTML="";
+  log("Đã tải tiến trình của bạn.");
+  showGame();
+ }catch(e){$("menuMessage").textContent="Không đọc được bản lưu. Hãy bấm Bắt đầu hành trình.";}
+}
+function enemyTurn(){
+ if(state.won)return;
+ const a=islands[state.island];
+ const damage=Math.max(2,a.atk-Math.floor(state.level/2)-(state.haki?5:0));
+ state.hp=Math.max(0,state.hp-damage);
+ log(a.enemy+" phản công, gây "+damage+" sát thương!");
+ if(state.hp<=0){
+  state.hp=1;
+  log("Bạn kiệt sức và được đồng đội kéo về an toàn. Hãy dùng 🍖 để hồi phục.");
+  toast("Hết sức! Hồi phục trước khi đánh tiếp.");
+ }
+}
+function win(){
+ state.won=true;
+ const reward=15+state.island*10;
+ state.gold+=reward;
+ state.xp+=25+state.island*8;
+ log("Chiến thắng! Nhận "+reward+" vàng và EXP.");
+ while(state.xp>=state.level*40){
+  state.xp-=state.level*40;
+  state.level++;
+  state.maxHp+=15;state.hp=state.maxHp;
+  log("LÊN CẤP "+state.level+"! HP đã tăng.");
+ }
+ if(state.island===islands.length-1){
+  log("Bạn đã chinh phục toàn bộ các đảo trong bản demo!");
+  toast("Vua Hải Tặc của bản demo!");
+ }else toast("Chiến thắng! Có thể sang đảo kế.");
+ render();
+}
+function attack(mult,skillName){
+ if(busy||!state)return;
+ if(state.won){toast("Hãy sang đảo kế tiếp!");return;}
+ busy=true;
+ const h=heroes[state.hero];
+ let damage=Math.floor((h.power+state.level*3+(state.haki?8:0))*mult);
+ if(state.hero===0&&state.gear===2)damage=Math.floor(damage*1.6);
+ if(state.hero===0&&state.gear===3)damage=Math.floor(damage*2.2);
+ state.enemyHp=Math.max(0,state.enemyHp-damage);
+ log(h.name+" dùng "+skillName+", gây "+damage+" sát thương!");
+ if(state.enemyHp<=0){
+  win();busy=false;return;
+ }
+ enemyTurn();render();busy=false;
+}
+function safeAction(fn){
+ try{fn();render();}catch(e){toast("Có lỗi: "+e.message);}
+}
+$("start").addEventListener("click",startGame);
+$("continue").addEventListener("click",loadGame);
+$("save").addEventListener("click",saveGame);
+$("home").addEventListener("click",()=>{
+ $("game").style.display="none";$("menu").style.display="flex";
+});
+$("attack").addEventListener("click",()=>attack(1,"đòn đánh thường"));
+$("skill").addEventListener("click",()=>attack(2,$("skill").textContent));
+$("dodge").addEventListener("click",()=>{
+ if(state.won){toast("Địch đã bị đánh bại.");return;}
+ log("Bạn né đòn và chờ thời cơ.");
+ if(Math.random()<.65){log("Né thành công!");}
+ else enemyTurn();
+ render();
+});
+$("heal").addEventListener("click",()=>safeAction(()=>{
+ if(state.items<=0){toast("Đã hết thịt hồi phục!");return;}
+ if(state.hp===state.maxHp){toast("HP đang đầy!");return;}
+ state.items--;const amount=Math.min(35,state.maxHp-state.hp);
+ state.hp+=amount;log("Ăn thịt hồi phục "+amount+" HP.");
+}));
+$("switch").addEventListener("click",()=>safeAction(()=>{
+ state.hero=(state.hero+1)%heroes.length;
+ log("Đổi nhân vật: "+heroes[state.hero].name+".");
+}));
+$("fruit").addEventListener("click",()=>safeAction(()=>{
+ state.haki=!state.haki;
+ log(state.haki?"Bật Haki! Đòn đánh mạnh hơn và giảm sát thương nhận vào.":"Tắt Haki.");
+}));
+$("next").addEventListener("click",()=>safeAction(()=>{
+ if(!state.won||state.island>=islands.length-1)return;
+ state.island++;setEnemy();
+ state.hp=Math.min(state.maxHp,state.hp+20);
+ log("Đến đảo mới: "+islands[state.island].name+".");
+ toast("Đã cập bến!");
+}));
+$("quest").addEventListener("click",()=>{
+ log("Nhiệm vụ: đánh bại "+islands[state.island].enemy+" để mở đường sang đảo kế tiếp.");
+ toast("Hạ gục mục tiêu để hoàn thành nhiệm vụ.");
+});
+})();
+</script>
+</body>
+</html>
